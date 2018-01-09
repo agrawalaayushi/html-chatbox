@@ -6,7 +6,8 @@ const app = express()
 
 app.engine('handlebars', expressHandlebars())
 app.set('view engine', 'handlebars')
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+
 
 app.get('/', function(req, res) {
   res.render('home')
