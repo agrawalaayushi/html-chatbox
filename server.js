@@ -1,23 +1,55 @@
 const express = require('express')
-const expressHandlebars = require('express-handlebars')
-const bodyParser = require('body-parser')
+    const bodyParser = require('body-parser')
+    const cors = require('cors')
+    const Chatkit = require('@pusher/chatkit-server')
 
-const app = express()
+    const app = express()
 
-app.engine('handlebars', expressHandlebars())
-app.set('view engine', 'handlebars')
-app.use(bodyParser.urlencoded({ extended: false }))
+    const chatkit = new Chatkit.default({
+      instanceLocator: 'YOUR_INSTANCE_LOCATOR',
+      key: 'YOUR_SECRET_KEY'
+    })
 
+    app.use(bodyParser.urlencoded({
+      extended: false
+    }))
+    app.use(bodyParser.json())
+    app.use(cors())
 
-app.get('/', function(req, res) {
-  res.render('home')
-})
+    app.post('/users', (req, res) => {
+      const { username } = req.body
 
-const PORT = 3000
-app.listen(PORT, err => {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(`Running on port ${PORT}`)
-  }
-})
+      chatkit
+        .createUser({
+          id: username,
+          name: username
+        })
+        .then(() => {
+          res.sendStatus(201)
+        })
+        .catch(err => {
+          if (err.error === 'services/chatkit/user_already_exists') {
+            console.log(`User already exists: ${username}`)
+            res.sendStatus(200)
+          } else {
+            res.status(err.status).json(err)
+          }
+        })
+    })
+
+    app.post('/authenticate', (req, res) => {
+      const authData = chatkit.authenticate({
+        userId: req.query.user_id
+      })
+      res.status(authData.status).send(authData.body)
+    })
+
+    const port = 3001
+
+    app.listen(port, err => {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log(`Running on port ${port}`)
+      }
+    })
