@@ -6,8 +6,8 @@ const express = require('express')
     const app = express()
 
     const chatkit = new Chatkit.default({
-      instanceLocator: 'YOUR_INSTANCE_LOCATOR',
-      key: 'YOUR_SECRET_KEY'
+      instanceLocator: 'v1:us1:152e35ba-cb48-47b3-97c6-70f534ddd337',
+      key: 'https://us1.pusherplatform.io/services/chatkit_token_provider/v1/152e35ba-cb48-47b3-97c6-70f534ddd337/token'
     })
 
     app.use(bodyParser.urlencoded({
